@@ -41,6 +41,8 @@ namespace MvcMovie.Controllers
 
         //this method parses the movie data without a trailer.
         //use this method in case youtube throws a exceeded quota error
+        //use ParseMovieData(result) - line 37
+
         /*private List<MovieModel> ParseMovieData(string result)
         {
             //deserialize JSON response string to a list of movie objects
@@ -59,6 +61,7 @@ namespace MvcMovie.Controllers
         }*/
 
         //this method parses the movie data with a trailer
+        //use await ParseMovieData(result) - line 37
         private async Task<List<MovieModel>> ParseMovieData(string result)
         {
             //deserialize JSON response string to a list of movie objects
