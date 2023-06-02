@@ -34,12 +34,14 @@ namespace MvcMovie.Controllers
 
             //read response as string and parse it to a list of movie models
             var result = await response.Content.ReadAsStringAsync();
-            var model = ParseMovieData(result);
+            var model =  await ParseMovieData(result);
 
             return View("Results", model);
         }
 
-        private List<MovieModel> ParseMovieData(string result)
+        //this method parses the movie data without a trailer.
+        //use this method in case youtube throws a exceeded quota error
+        /*private List<MovieModel> ParseMovieData(string result)
         {
             //deserialize JSON response string to a list of movie objects
             var parsedResult = JsonConvert.DeserializeObject<SearchResult>(result);
@@ -48,6 +50,48 @@ namespace MvcMovie.Controllers
             {
                 Console.WriteLine("Parsed result count: " + parsedResult.Search.Count);
                 return parsedResult.Search;
+            }
+            else
+            {
+                Console.WriteLine("Error parsing movie data: " + result);
+                return new List<MovieModel>();
+            }
+        }*/
+
+        //this method parses the movie data with a trailer
+        private async Task<List<MovieModel>> ParseMovieData(string result)
+        {
+            //deserialize JSON response string to a list of movie objects
+            var parsedResult = JsonConvert.DeserializeObject<SearchResult>(result);
+            var movies = new List<MovieModel>();
+
+            if (parsedResult != null && parsedResult.Search != null)
+            {
+                var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+                {
+                    ApiKey = "AIzaSyB7QCvyN3mEumyDscwPYQu5VsHlMAkmg0A"
+                });
+
+
+                foreach (var movie in parsedResult.Search)
+                {
+                    var searchListRequest = youtubeService.Search.List("snippet");
+                    searchListRequest.Q = movie.Title + " trailer";
+                    searchListRequest.MaxResults = 1;
+
+                    var searchListResponse = await searchListRequest.ExecuteAsync();
+                    var searchResult = searchListResponse.Items.FirstOrDefault();
+
+                    if (searchResult != null && searchResult.Id.Kind == "youtube#video")
+                    {
+                        var trailerVideoId = searchResult.Id.VideoId;
+                        movie.TrailerUrl = $"https://www.youtube.com/embed/{trailerVideoId}";
+                    }
+
+                    movies.Add(movie);
+                }
+
+                return movies;
             }
             else
             {
