@@ -34,7 +34,7 @@ namespace MvcMovie.Controllers
 
             //read response as string and parse it to a list of movie models
             var result = await response.Content.ReadAsStringAsync();
-            var model =  await ParseMovieData(result);
+            var model = await ParseMovieData(result);
 
             return View("Results", model);
         }
@@ -62,6 +62,7 @@ namespace MvcMovie.Controllers
 
         //this method parses the movie data with a trailer
         //use await ParseMovieData(result) - line 37
+        
         private async Task<List<MovieModel>> ParseMovieData(string result)
         {
             //deserialize JSON response string to a list of movie objects
@@ -109,4 +110,3 @@ namespace MvcMovie.Controllers
         }
     }
 }
-//AIzaSyB7QCvyN3mEumyDscwPYQu5VsHlMAkmg0A
